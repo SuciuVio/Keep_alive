@@ -1,4 +1,4 @@
-﻿# Keep-Alive Android App - Down Server Alerts Design
+# Keep-Alive Android App - Down Server Alerts Design
 
 ## Context
 

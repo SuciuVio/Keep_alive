@@ -1,4 +1,4 @@
-﻿package com.keepalive
+package com.keepalive
 
 import android.Manifest
 import android.app.Activity

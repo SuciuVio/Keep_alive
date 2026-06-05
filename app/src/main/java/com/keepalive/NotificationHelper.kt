@@ -1,4 +1,4 @@
-﻿package com.keepalive
+package com.keepalive
 
 import android.app.Notification
 import android.app.NotificationChannel

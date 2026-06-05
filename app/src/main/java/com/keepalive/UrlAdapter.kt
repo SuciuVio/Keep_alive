@@ -1,4 +1,4 @@
-﻿package com.keepalive
+package com.keepalive
 
 import android.view.LayoutInflater
 import android.view.View

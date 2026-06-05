@@ -1,4 +1,4 @@
-﻿package com.keepalive
+package com.keepalive
 
 import android.content.Context
 import com.google.gson.Gson

@@ -10,6 +10,12 @@ on:
 permissions:
   contents: read
 
+env:
+  RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+  RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+  RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+  RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+
 jobs:
   build-keep-alive-apk:
     name: Build Keep_alive APK
@@ -41,15 +47,43 @@ jobs:
       - name: Build Keep_alive debug APK
         run: gradle assembleDebug --no-daemon --stacktrace
 
-      - name: Rename APK
+      - name: Prepare debug APK
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/debug/app-debug.apk dist/Keep_alive.apk
+          cp app/build/outputs/apk/debug/app-debug.apk dist/Keep_alive-debug.apk
 
-      - name: Upload Keep_alive APK
+      - name: Prepare release signing secrets
+        if: env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_KEYSTORE_PASSWORD != '' && env.RELEASE_KEY_ALIAS != '' && env.RELEASE_KEY_PASSWORD != ''
+        run: |
+          printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 --decode > release.keystore
+          CERT_SHA256=$(keytool -list -v -keystore release.keystore -alias "$RELEASE_KEY_ALIAS" -storepass "$RELEASE_KEYSTORE_PASSWORD" | awk -F': ' '/SHA256:/{print $2; exit}' | tr -d ':')
+          echo "KEYSTORE_PATH=$PWD/release.keystore" >> "$GITHUB_ENV"
+          echo "KEYSTORE_PASSWORD=$RELEASE_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "KEY_ALIAS=$RELEASE_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "KEY_PASSWORD=$RELEASE_KEY_PASSWORD" >> "$GITHUB_ENV"
+          echo "EXPECTED_SIGNING_CERT_SHA256=$CERT_SHA256" >> "$GITHUB_ENV"
+
+      - name: Build signed obfuscated release APK
+        if: env.KEYSTORE_PATH != ''
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Prepare release APK
+        if: env.KEYSTORE_PATH != ''
+        run: cp app/build/outputs/apk/release/app-release.apk dist/Keep_alive-release.apk
+
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: Keep_alive
-          path: dist/Keep_alive.apk
+          name: Keep_alive-debug
+          path: dist/Keep_alive-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload signed release APK
+        if: env.KEYSTORE_PATH != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: Keep_alive-release
+          path: dist/Keep_alive-release.apk
           if-no-files-found: error
           retention-days: 14

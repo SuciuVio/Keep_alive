@@ -1,0 +1,4 @@
+-keepattributes Signature,*Annotation*
+-keep class com.keepalive.PingService { *; }
+-keep class com.keepalive.MainActivity { *; }
+-dontwarn androidx.biometric.**

@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:id="@+id/editTextUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="https://your-app.onrender.com"
+        android:inputType="textUri"
+        android:minHeight="48dp"
+        android:singleLine="true" />
+
+    <Button
+        android:id="@+id/btnAddUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Adauga URL" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="12dp"
+        android:background="#DDDDDD" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewUrls"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/btnToggleService"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Porneste Monitorizarea" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Log ping-uri:" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:background="#F5F5F5"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/textViewLog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textSize="12sp" />
+    </ScrollView>
+</LinearLayout>

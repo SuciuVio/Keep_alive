@@ -80,27 +80,41 @@ class PingService : Service() {
 
     private fun pingUrl(url: String) {
         val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+        var connection: HttpURLConnection? = null
         try {
-            val connection = URL(url).openConnection() as HttpURLConnection
+            connection = URL(url).openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.connectTimeout = 10_000
             connection.readTimeout = 10_000
             connection.instanceFollowRedirects = true
             val code = connection.responseCode
-            connection.disconnect()
 
-            failureCounts[url] = 0
-            alertedUrls.remove(url)
-            broadcastLog("OK [$timestamp] $url -> HTTP $code")
-        } catch (e: Exception) {
-            val failures = (failureCounts[url] ?: 0) + 1
-            failureCounts[url] = failures
-            broadcastLog("FAIL [$timestamp] $url -> ${e.message ?: e.javaClass.simpleName}")
-
-            if (failures >= FAILURE_ALERT_THRESHOLD && !alertedUrls.contains(url)) {
-                alertedUrls.add(url)
-                NotificationHelper.showDownAlert(this, url, failures)
+            if (isSuccessfulHttpStatus(code)) {
+                failureCounts[url] = 0
+                alertedUrls.remove(url)
+                broadcastLog("OK [$timestamp] $url -> HTTP $code")
+            } else {
+                recordFailure(url, timestamp, "HTTP $code")
             }
+        } catch (e: Exception) {
+            recordFailure(url, timestamp, e.message ?: e.javaClass.simpleName)
+        } finally {
+            connection?.disconnect()
+        }
+    }
+
+    private fun isSuccessfulHttpStatus(code: Int): Boolean {
+        return code in 200..399
+    }
+
+    private fun recordFailure(url: String, timestamp: String, reason: String) {
+        val failures = (failureCounts[url] ?: 0) + 1
+        failureCounts[url] = failures
+        broadcastLog("FAIL [$timestamp] $url -> $reason")
+
+        if (failures >= FAILURE_ALERT_THRESHOLD && !alertedUrls.contains(url)) {
+            alertedUrls.add(url)
+            NotificationHelper.showDownAlert(this, url, failures)
         }
     }
 
